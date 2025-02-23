@@ -86,8 +86,8 @@ def setup_dataloader(args):
             fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4],
             ensemble=1,
             mode='train',
-            label_file='../data/HVU/labels.csv',
-            annotation_file='../data/HVU/annotations.csv'
+            label_file='/ssd4/ajaved/evaluation_repos/open_vocab/label_files/open_vocab_all_categories_labels.csv',
+            annotation_file='/ssd4/ajaved/evaluation_repos/open_vocab/category_files/open_vocab_all_categories_val.txt'
         )
 
         val_dataset = readFeatureHVU(
@@ -96,8 +96,8 @@ def setup_dataloader(args):
             fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4],
             ensemble=args.valEnsemble,
             mode='val',
-            label_file='../data/HVU/labels.csv',
-            annotation_file='../data/HVU/annotations.csv'
+            label_file='/ssd4/ajaved/evaluation_repos/open_vocab/label_files/open_vocab_all_categories_labels.csv',
+            annotation_file='/ssd4/ajaved/evaluation_repos/open_vocab/category_files/open_vocab_all_categories_val.txt'
         )
     # More datasets to be continued
 
