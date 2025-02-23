@@ -76,8 +76,29 @@ def setup_dataloader(args):
         trainactions, valactions = [], []
         trn_dataset = readFeatureHMDB51(root=feature_root, frames=args.numFrames, fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4], ensemble=1, mode='train')
         val_dataset = readFeatureHMDB51(root=feature_root, frames=args.numFrames, fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4], ensemble=args.valEnsemble, mode='val')
+    
     elif args.dataset.startswith('HVU'):
-        pass
+        trainactions, valactions = [], []
+
+        trn_dataset = readFeatureHVU(
+            root=feature_root,
+            frames=args.numFrames,
+            fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4],
+            ensemble=1,
+            mode='train',
+            label_file='../data/HVU/labels.csv',
+            annotation_file='../data/HVU/annotations.csv'
+        )
+
+        val_dataset = readFeatureHVU(
+            root=feature_root,
+            frames=args.numFrames,
+            fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4],
+            ensemble=args.valEnsemble,
+            mode='val',
+            label_file='../data/HVU/labels.csv',
+            annotation_file='../data/HVU/annotations.csv'
+        )
     # More datasets to be continued
 
     return [trn_dataset, val_dataset, trainactions, valactions]
