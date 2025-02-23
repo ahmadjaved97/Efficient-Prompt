@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--backbone', type=str, default='ViT-B/16', choices=['ViT-B/16'])
     parser.add_argument('--dataset', type=str, default='HMDB51-feature-30fps-center', 
-                         choices=['HMDB51-feature-30fps-center','Debug',])
+                         choices=['HMDB51-feature-30fps-center','Debug', 'HVU'])
 
     args = parser.parse_args()
     main(args)

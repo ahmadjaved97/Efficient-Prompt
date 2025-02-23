@@ -66,7 +66,7 @@ def setup_path(args):
 
 def setup_dataloader(args):
     # load from extracted visual feature
-    if args.dataset == 'HMDB51-feature-30fps-center':
+    if args.dataset in ['HMDB51-feature-30fps-center', 'HVU']:
         feature_root = '../feat/HMDB'
     # More datasets to be continued
     else:
@@ -76,6 +76,8 @@ def setup_dataloader(args):
         trainactions, valactions = [], []
         trn_dataset = readFeatureHMDB51(root=feature_root, frames=args.numFrames, fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4], ensemble=1, mode='train')
         val_dataset = readFeatureHMDB51(root=feature_root, frames=args.numFrames, fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4], ensemble=args.valEnsemble, mode='val')
+    elif args.dataset.startswith('HVU'):
+        pass
     # More datasets to be continued
 
     return [trn_dataset, val_dataset, trainactions, valactions]
