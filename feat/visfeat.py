@@ -9,7 +9,7 @@ from torchvision.transforms import Resize, Compose, ToTensor, Normalize, CenterC
 
 
 def load_clip_cpu(backbone_name):
-    model_path = 'path_to_CLIP_ViT-B-16_pre-trained_parameters'  
+    model_path = '/ssd1/ajaved/UniFormerV2/extract_clip/model_weights/vit_b16.pth'  
     try:
         model = torch.jit.load(model_path, map_location='cpu').eval()
         state_dict = None
@@ -60,8 +60,9 @@ def get_videos(vidname, read_path):
 
 if __name__ == "__main__":
     maxlen = 2000                                           # the maximum number of video frames that GPU can process
-    savepath = 'path_to_save_visual_features'
-    datapath = 'path_to_input_videos'
+    savepath = './ssd4/ajaved/evaluation_repos/Efficient-Prompt/feat/HVU_feats'
+    os.makedirs(savepath, exist_ok=True)
+    datapath = '/ssd2/ajaved/hvu_val'
     os.chdir(datapath)
     allvideos = os.listdir()
     allvideos.sort()
