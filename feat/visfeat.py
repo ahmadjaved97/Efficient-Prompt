@@ -9,7 +9,7 @@ from torchvision.transforms import Resize, Compose, ToTensor, Normalize, CenterC
 
 
 def load_clip_cpu(backbone_name):
-    model_path = '/ssd1/ajaved/UniFormerV2/extract_clip/model_weights/vit_b16.pth'  
+    model_path = '/ssd4/ajaved/evaluation_repos/clip_vit_b16_full.pth'  
     try:
         model = torch.jit.load(model_path, map_location='cpu').eval()
         state_dict = None
