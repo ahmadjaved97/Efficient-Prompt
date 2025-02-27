@@ -5,11 +5,11 @@ import numpy as np
 from PIL import Image
 from clip import clip
 from torchvision.transforms import Resize, Compose, ToTensor, Normalize, CenterCrop
-
-
+from tqdm import tqdm
+from rich.progress import track
 
 def load_clip_cpu(backbone_name):
-    model_path = '/ssd4/ajaved/evaluation_repos/clip_vit_b16_full.pth'  
+    model_path = '/home/s63ajave_hpc/clip_vit_b16_full.pth'  
     try:
         model = torch.jit.load(model_path, map_location='cpu').eval()
         state_dict = None
@@ -35,7 +35,7 @@ def transform_center():
 
 def get_videos(vidname, read_path):
     allframes = []
-    videoins = read_path + vidname
+    videoins = os.path.join(read_path, vidname)
     vvv = cv2.VideoCapture(videoins)
     if not vvv.isOpened():
         print('Video is not opened! {}'.format(videoins))
@@ -60,9 +60,9 @@ def get_videos(vidname, read_path):
 
 if __name__ == "__main__":
     maxlen = 2000                                           # the maximum number of video frames that GPU can process
-    savepath = './ssd4/ajaved/evaluation_repos/Efficient-Prompt/feat/HVU_feats'
+    savepath = '/lustre/mlnvme/data/s63ajave_hpc-hvu_eval/feats'
     os.makedirs(savepath, exist_ok=True)
-    datapath = '/ssd2/ajaved/hvu_val'
+    datapath = '/lustre/mlnvme/data/s63ajave_hpc-hvu_eval/hvu_val'
     os.chdir(datapath)
     allvideos = os.listdir()
     allvideos.sort()
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         paramclip.requires_grad = False
 
 
-    for vid in range(len(allvideos)):
+    for vid in track(range(len(allvideos))):
         vidone = get_videos(allvideos[vid], datapath)      # shape = (T,3,224,224)
         print('transform %d video has been done!' % vid)
 
@@ -89,9 +89,7 @@ if __name__ == "__main__":
         vidinsfeat = np.array(vidinsfeat)                  # shape = (T,512)
 
         assert(len(vidinsfeat) == len(vidone))
-        if not os.path.exists(savepath):
-            os.mkdir(savepath)
-        np.save(savepath+allvideos[vid][:-4]+'.npy', vidinsfeat)
+        np.save(os.path.join(savepath, allvideos[vid][:-4]+'.npy'), vidinsfeat)
 
         print('visual features of %d video have been done!' % vid)
 
