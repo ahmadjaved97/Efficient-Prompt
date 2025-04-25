@@ -3,6 +3,8 @@ import einops
 import numpy as np
 from tqdm import tqdm
 import clip
+from sklearn.metrics import average_precision_score
+
 
 
 def val_CLIPrompt(args, dataloader, text, model, logger, device, iteration):
@@ -56,3 +58,70 @@ def val_CLIPrompt(args, dataloader, text, model, logger, device, iteration):
         if logger:
             logger.add_scalar('val/top1', top1ACC, iteration)
             logger.add_scalar('val/top5', top5ACC, iteration)
+
+def val_CLIPrompt(args, dataloader, text, model, logger, device, iteration):
+    """
+    Validation function for multi-label classification using mean Average Precision (mAP).
+    
+    Args:
+        args: Argument parser containing model and validation settings.
+        dataloader: DataLoader for validation dataset.
+        text: Preprocessed action lists and mappings.
+        model: Trained model.
+        logger: Tensorboard logger.
+        device: CUDA or CPU.
+        iteration: Current iteration number.
+    """
+
+    loss = []
+    valEnsemble = args.valEnsemble
+    featnorm = args.featnorm
+    actionlist, actiondict, actiontoken, trainactions, valactions = text
+
+    model.eval()
+    with torch.no_grad():
+        similarity, targets = torch.zeros(0).to(device), torch.zeros(0).to(device)
+
+        for idx, sample in tqdm(enumerate(dataloader), total=len(dataloader)):
+            vids, labels = sample  # `labels` is already a multi-hot tensor
+
+            if idx == 0:
+                vFeature, tFeature = model(vids.to(device), actionlist)
+            else:
+                vFeature, _ = model(vids.to(device), actionlist[:1])
+
+            # Ensure feature normalization if required
+            if featnorm:
+                vFeature = vFeature / vFeature.norm(dim=-1, keepdim=True)
+                tFeature = tFeature / tFeature.norm(dim=-1, keepdim=True)
+                logits = vFeature @ tFeature.t() / 0.07  
+            else:
+                logits = vFeature @ tFeature.t()
+
+            # Use Sigmoid instead of Softmax for multi-label classification
+            pred_probs = torch.sigmoid(logits)
+
+            # Store results
+            similarity = torch.cat([similarity, pred_probs], dim=0)
+            targets = torch.cat([targets, labels.to(device)], dim=0)  # Keep labels as tensor
+
+        # Compute ensemble predictions
+        sim_ensemble = torch.zeros(0).to(device)
+        test_num = int(len(similarity) / valEnsemble)
+
+        for enb in range(valEnsemble):
+            sim_ensemble = torch.cat([sim_ensemble, similarity[enb * test_num: enb * test_num + test_num].unsqueeze(0)], dim=0)
+
+        target_final = targets[:test_num]
+        sim_final = torch.mean(sim_ensemble, 0)  # Average ensemble predictions
+
+        # Compute mean Average Precision (mAP)
+        sim_final_np = sim_final.cpu().numpy()
+        target_final_np = target_final.cpu().numpy()
+        mAP = average_precision_score(target_final_np, sim_final_np, average="macro")
+
+        print('Iteration {},'.format(iteration),
+              'Validation mAP: {:.03f}'.format(mAP))
+
+        if logger:
+            logger.add_scalar('val/mAP', mAP, iteration)

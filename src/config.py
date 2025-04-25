@@ -66,7 +66,7 @@ def setup_path(args):
 
 def setup_dataloader(args):
     # load from extracted visual feature
-    if args.dataset == 'HMDB51-feature-30fps-center':
+    if args.dataset in ['HMDB51-feature-30fps-center', 'HVU']:
         feature_root = '../feat/HMDB'
     # More datasets to be continued
     else:
@@ -76,6 +76,29 @@ def setup_dataloader(args):
         trainactions, valactions = [], []
         trn_dataset = readFeatureHMDB51(root=feature_root, frames=args.numFrames, fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4], ensemble=1, mode='train')
         val_dataset = readFeatureHMDB51(root=feature_root, frames=args.numFrames, fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4], ensemble=args.valEnsemble, mode='val')
+    
+    elif args.dataset.startswith('HVU'):
+        trainactions, valactions = [], []
+
+        trn_dataset = readFeatureHVU(
+            root=feature_root,
+            frames=args.numFrames,
+            fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4],
+            ensemble=1,
+            mode='train',
+            label_file='/ssd4/ajaved/evaluation_repos/open_vocab/label_files/open_vocab_all_categories_labels.csv',
+            annotation_file='/ssd4/ajaved/evaluation_repos/open_vocab/category_files/open_vocab_all_categories_val.txt'
+        )
+
+        val_dataset = readFeatureHVU(
+            root=feature_root,
+            frames=args.numFrames,
+            fpsR=[1, 1/2, 1/3, 1/3, 1/3, 1/4],
+            ensemble=args.valEnsemble,
+            mode='val',
+            label_file='/ssd4/ajaved/evaluation_repos/open_vocab/label_files/open_vocab_all_categories_labels.csv',
+            annotation_file='/ssd4/ajaved/evaluation_repos/open_vocab/category_files/open_vocab_all_categories_val.txt'
+        )
     # More datasets to be continued
 
     return [trn_dataset, val_dataset, trainactions, valactions]
